@@ -30,7 +30,7 @@ namespace JurasicPark
             Console.WriteLine("ADD - Add a new dinosaur to the park");
             Console.WriteLine("REMOVE - Remove a dinosaur from the park");
             Console.WriteLine("TRANSFER - Transfer a dinosaur to another enclosure");
-            Console.WriteLine("SUMMARY - See the total amount of Carnivores and Herbivores in the park");
+            Console.WriteLine("SUMMARY - See the total amount of carnivores and herbivores in the park");
             Console.WriteLine("EXIT - Leave the park\n");
             Console.Write("What would you like to do? ");
             var selection = Console.ReadLine().Trim().ToUpper();
@@ -47,14 +47,38 @@ namespace JurasicPark
         }
 
 
+        static Dinosaur GetDinosaur(List<Dinosaur> dinosaurs, String action)
+        {
+            var name = GetName();
+
+            var dinosaursWithThatName = dinosaurs.Where(dinosaur => dinosaur.Name == name);
+            ViewDinosaurs(dinosaursWithThatName);
+
+            Console.Write($"\nThe dinosaurs are numbered. What dinosaur number would you like to {action}? ");
+            var dinoNumber = int.Parse(Console.ReadLine());
+            while (dinoNumber <= 0 || dinoNumber > dinosaursWithThatName.Count())
+            {
+                Console.WriteLine($"\nThat number is bigger or smaller than the amount of dinosaurs that you opted to {action}");
+                Console.WriteLine("The dinosaurs are numbered!");
+                Console.Write("Please enter a different number: ");
+                dinoNumber = int.Parse(Console.ReadLine());
+            }
+            Console.WriteLine($"\nAre you sure that you want to {action} {dinosaurs[dinoNumber - 1].Name}, the {dinosaurs[dinoNumber - 1].DietType} weighing {dinosaurs[dinoNumber - 1].Weight} lbs...");
+            Console.Write($"...in enclosure {dinosaurs[dinoNumber - 1].EnclosureNumber} from the park? Please enter 'YES': ");
+            return dinosaurs[dinoNumber - 1];
+        }
+
+
         static void ViewDinosaurs(IEnumerable<Dinosaur> dinosaursToBeViewed)
         {
             dinosaursToBeViewed.OrderBy(dinosaur => dinosaur.WhenAcquired);
             foreach (var dinosaur in dinosaursToBeViewed)
             {
-                Console.WriteLine($"{dinosaur.WhenAcquired} - {dinosaur.Name}...");
+                var index = 1;
+                Console.WriteLine($"{index}. {dinosaur.Name} found on {dinosaur.WhenAcquired}...");
                 Console.WriteLine($"...a {dinosaur.DietType}, weighing {dinosaur.Weight} lbs...");
                 Console.WriteLine($"...was captured and placed in Enclosure {dinosaur.EnclosureNumber}\n");
+                index++;
             }
             // - ### Adventure Mode
             // - create a method for viewing dinosaurs acquired after a certain date
@@ -87,46 +111,47 @@ namespace JurasicPark
         }
 
 
-        static IEnumerable<Dinosaur> RemoveDinosaurs(List<Dinosaur> dinosaurs)
+        static IEnumerable<Dinosaur> RemoveDinosaur(List<Dinosaur> dinosaurs)
         {
-            var name = GetName();
-
-            var dinosaursWithThatName = dinosaurs.Where(dinosaur => dinosaur.Name == name);
-            ViewDinosaurs(dinosaursWithThatName);
-
-            Console.Write("\nWhich dinosaur would you like to delete? ");
-            var dinoNumber = int.Parse(Console.ReadLine());
-
-            while (dinoNumber <= 0 || dinoNumber > dinosaursWithThatName.Count())
+            var dinosaur = GetDinosaur(dinosaurs, "remove");
+            if (Console.ReadLine().Trim().ToUpper() == "YES")
             {
-                Console.WriteLine("\nThat number is bigger or smaller than the amount of dinosaurs that you opted to delete");
-                Console.Write("Please enter a different number: ");
-                dinoNumber = int.Parse(Console.ReadLine());
+                dinosaurs.Remove(dinosaur);
+                Console.WriteLine("\nDinosaur successfully removed from the park\n");
             }
-            dinosaurs.Remove(dinosaurs[dinoNumber - 1]);
-            Console.WriteLine("\nDinosaur successfully removed\n");
+            else
+            {
+                Console.WriteLine("\nNo dinosaurs were removed from the park\n");
+            }
             return dinosaurs;
         }
 
-        // - ask the user for the dinosaur's name
-        // - find the dinosaur and display dinosaurs info
-        // - have user confirm that the dinosaur info displayed is the dinosaur they are looking for and they want to remove it
-        // - ### Adventure Mode
-        // - if dinosaur is not what user wants and another exists, repeat all steps above except for asking the dinosaur's name with next dinosaur
-        // - remove selected dinosaur from list
 
-        // Create a method for transfer
+        static IEnumerable<Dinosaur> TransferDinosaur(List<Dinosaur> dinosaurs)
+        {
+            var dinosaur = GetDinosaur(dinosaurs, "transfer");
+            if (Console.ReadLine().Trim().ToUpper() == "YES")
+            {
+                Console.Write($"Which enclosure would you like to move {dinosaur.Name} to? ");
+                dinosaur.EnclosureNumber = int.Parse(Console.ReadLine());
+                Console.WriteLine("\nDinosaur successfully transferred to Enclosure {}\n");
+            }
+            else
+            {
+                Console.WriteLine("\nNo dinosaurs were transferred\n");
+            }
+            return dinosaurs;
 
-        // - ask the user for the dinosaur's name
-        // - find the dinosaur and display dinosaurs info
-        // - have user confirm that the dinosaur info displayed is the dinosaur they are looking for and they want to transfer it
-        // - ### Adventure Mode
-        // - if dinosaur is not what user wants and another exists, repeat all steps above except for asking the dinosaur's name with next dinosaur
-        // - ask the user where they'd like to transfer the dinosaur
-        // - transfer the selected dinosaur
-        // Create a method for summary
+        }
 
-        // - display the number of carnivores and the number of herbivores within the list of dinosaurs
+
+        static void ViewSummary(List<Dinosaur> dinosaurs)
+        {
+            var carnivores = dinosaurs.Where(dinosaur => dinosaur.DietType.ToLower() == "carnivore");
+            Console.WriteLine($"\nThere are {carnivores.Count()} carnivores and {dinosaurs.Count() - carnivores.Count()} herbivores in the park\n");
+        }
+
+
         static void Main(string[] args)
         {
             Banner("Welcome to Jurassic Park!");
@@ -153,15 +178,15 @@ namespace JurasicPark
                         choice = Menu();
                         break;
                     case "REMOVE":
-                        RemoveDinosaurs(dinosaurs);
+                        RemoveDinosaur(dinosaurs);
                         choice = Menu();
                         break;
                     case "TRANSFER":
-                        Console.WriteLine("Testing");
+                        TransferDinosaur(dinosaurs);
                         choice = Menu();
                         break;
                     case "SUMMARY":
-                        Console.WriteLine("Testing");
+                        ViewSummary(dinosaurs);
                         choice = Menu();
                         break;
                     default:
