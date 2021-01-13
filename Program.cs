@@ -47,21 +47,36 @@ namespace JurasicPark
         }
 
 
+        static int GetNumber()
+        {
+            var numberToBeParsed = Console.ReadLine();
+            var parsedNumber = 0;
+            bool wasThisParsable = int.TryParse(numberToBeParsed, out parsedNumber);
+            while (!wasThisParsable)
+            {
+                Console.Write("\nNot a number. Please enter a number only: ");
+                numberToBeParsed = Console.ReadLine();
+                wasThisParsable = int.TryParse(numberToBeParsed, out parsedNumber);
+            }
+            return parsedNumber;
+        }
+
+
         static Dinosaur GetDinosaur(List<Dinosaur> dinosaurs, String action)
         {
             var name = GetName();
 
             var dinosaursWithThatName = dinosaurs.Where(dinosaur => dinosaur.Name == name);
-            ViewDinosaurs(dinosaursWithThatName);
+            ViewByAcquired(dinosaursWithThatName);
 
             Console.Write($"\nThe dinosaurs are numbered. What dinosaur number would you like to {action}? ");
-            var dinoNumber = int.Parse(Console.ReadLine());
+            var dinoNumber = GetNumber();
             while (dinoNumber <= 0 || dinoNumber > dinosaursWithThatName.Count())
             {
                 Console.WriteLine($"\nThat number is bigger or smaller than the amount of dinosaurs that you opted to {action}");
                 Console.WriteLine("The dinosaurs are numbered!");
                 Console.Write("Please enter a different number: ");
-                dinoNumber = int.Parse(Console.ReadLine());
+                dinoNumber = GetNumber();
             }
             Console.WriteLine($"\nAre you sure that you want to {action} {dinosaurs[dinoNumber - 1].Name}, the {dinosaurs[dinoNumber - 1].DietType} weighing {dinosaurs[dinoNumber - 1].Weight} lbs...");
             Console.Write($"...in enclosure {dinosaurs[dinoNumber - 1].EnclosureNumber} from the park? Please enter 'YES': ");
@@ -69,20 +84,60 @@ namespace JurasicPark
         }
 
 
-        static void ViewDinosaurs(IEnumerable<Dinosaur> dinosaursToBeViewed)
+        static void ViewDinosaurs(List<Dinosaur> dinosaursToBeViewed)
         {
+            Console.WriteLine("\nACQUIRED - View all dinosaurs in park, in order of when they were acquired");
+            Console.WriteLine("ENCLOSURE - View all dinosaurs in a given enclosure number\n");
+            Console.Write("What exactly would you like to see? ");
+            var choice = Console.ReadLine().Trim().ToUpper();
+
+            switch (choice)
+            {
+                case "ACQUIRED":
+                    ViewByAcquired(dinosaursToBeViewed);
+                    break;
+                case "ENCLOSURE":
+                    ViewByEnclosure(dinosaursToBeViewed);
+                    break;
+                default:
+                    Console.WriteLine("\nAh Ah Ah, that's not the magic word!\n");
+                    break;
+            }
+        }
+
+
+        static void ViewByAcquired(IEnumerable<Dinosaur> dinosaursToBeViewed)
+        {
+            var index = 1;
             dinosaursToBeViewed.OrderBy(dinosaur => dinosaur.WhenAcquired);
             foreach (var dinosaur in dinosaursToBeViewed)
             {
-                var index = 1;
-                Console.WriteLine($"{index}. {dinosaur.Name} found on {dinosaur.WhenAcquired}...");
-                Console.WriteLine($"...a {dinosaur.DietType}, weighing {dinosaur.Weight} lbs...");
-                Console.WriteLine($"...was captured and placed in Enclosure {dinosaur.EnclosureNumber}\n");
+
+                Console.WriteLine($"{index}. {dinosaur.Name} was found on {dinosaur.WhenAcquired}...");
+                Console.WriteLine($"...is a {dinosaur.DietType}, weighing {dinosaur.Weight} lbs...");
+                Console.WriteLine($"...and was captured and placed in Enclosure {dinosaur.EnclosureNumber}\n");
                 index++;
             }
-            // - ### Adventure Mode
-            // - create a method for viewing dinosaurs acquired after a certain date
-            // - create a method for viewing dinosaurs in a given enclosure number
+        }
+
+
+        static void ViewByEnclosure(List<Dinosaur> dinosaursToBeViewed)
+        {
+            Console.Write("Which enclosure number do you want to view? ");
+            var enclosure = GetNumber();
+            var dinosaursInEnclosure = dinosaursToBeViewed.Where(dinosaur => dinosaur.EnclosureNumber == enclosure);
+            if (dinosaursInEnclosure.Count() == 0)
+            {
+                Console.WriteLine("\nThere are no dinosaurs in this enclosure");
+            }
+            else
+            {
+                foreach (var dinosaur in dinosaursInEnclosure)
+                {
+                    Console.WriteLine($"{dinosaur.Name} was found on {dinosaur.WhenAcquired}...");
+                    Console.WriteLine($"... is a {dinosaur.DietType}, weighing {dinosaur.Weight} lbs\n");
+                }
+            }
         }
 
 
@@ -94,10 +149,10 @@ namespace JurasicPark
             var diet = Console.ReadLine();
 
             Console.Write($"\nWhat's {name}'s weight? ");
-            var weight = int.Parse(Console.ReadLine());
+            var weight = GetNumber();
 
             Console.Write($"\nWhat's {name}'s enclosure number? ");
-            var enclosure = int.Parse(Console.ReadLine());
+            var enclosure = GetNumber();
             var dinosaurToAdd = new Dinosaur
             {
                 Name = name,
@@ -133,7 +188,7 @@ namespace JurasicPark
             if (Console.ReadLine().Trim().ToUpper() == "YES")
             {
                 Console.Write($"Which enclosure would you like to move {dinosaur.Name} to? ");
-                dinosaur.EnclosureNumber = int.Parse(Console.ReadLine());
+                dinosaur.EnclosureNumber = GetNumber();
                 Console.WriteLine("\nDinosaur successfully transferred to Enclosure {}\n");
             }
             else
