@@ -14,12 +14,14 @@ namespace JurasicPark
             public int Weight { get; set; }
             public int EnclosureNumber { get; set; }
         }
+
         static void Banner(String message)
         {
             Console.WriteLine("\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~");
             Console.WriteLine(message);
             Console.WriteLine("~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n");
         }
+
         static string Menu()
         {
             Console.WriteLine("\nVIEW - View all all dinosaurs in the park");
@@ -37,7 +39,6 @@ namespace JurasicPark
 
         static void View(List<Dinosaur> dinosaursToBeViewed)
         {
-            // - display the dinosaur list in a user friendly format in order acquired
             dinosaursToBeViewed.OrderBy(dinosaur => dinosaur.WhenAcquired);
             foreach (var dinosaur in dinosaursToBeViewed)
             {
@@ -45,14 +46,36 @@ namespace JurasicPark
                 Console.WriteLine($"...a {dinosaur.DietType}, weighing {dinosaur.Weight} lbs...");
                 Console.WriteLine($"...was captured and placed in Enclosure {dinosaur.EnclosureNumber}\n");
             }
-
             // - ### Adventure Mode
             // - create a method for viewing dinosaurs acquired after a certain date
             // - create a method for viewing dinosaurs in a given enclosure number
         }
 
 
+        static List<Dinosaur> Add(List<Dinosaur> dinosaurs)
+        {
+            Console.Write("\nWhat's the dinosaur's name? ");
+            var name = Console.ReadLine();
 
+            Console.Write($"\nIs {name} a carnivore or herbivore? ");
+            var diet = Console.ReadLine();
+
+            Console.Write($"\nWhat's {name}'s weight? ");
+            var weight = int.Parse(Console.ReadLine());
+
+            Console.Write($"\nWhat's {name}'s enclosure number? ");
+            var enclosure = int.Parse(Console.ReadLine());
+            var dinosaurToAdd = new Dinosaur
+            {
+                Name = name,
+                DietType = diet,
+                Weight = weight,
+                EnclosureNumber = enclosure
+            };
+
+            dinosaurs.Add(dinosaurToAdd);
+            return dinosaurs;
+        }
         // Create a method for add
 
         // - capture all user required inputs for the dinosaur class, and place that new object within the dinosaur list
@@ -100,7 +123,7 @@ namespace JurasicPark
                         choice = Menu();
                         break;
                     case "ADD":
-                        Console.WriteLine("Testing");
+                        Add(dinosaurs);
                         choice = Menu();
                         break;
                     case "REMOVE":
