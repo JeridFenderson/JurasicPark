@@ -15,12 +15,14 @@ namespace JurasicPark
             public int EnclosureNumber { get; set; }
         }
 
+
         static void Banner(String message)
         {
             Console.WriteLine("\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~");
             Console.WriteLine(message);
             Console.WriteLine("~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n");
         }
+
 
         static string Menu()
         {
@@ -37,7 +39,15 @@ namespace JurasicPark
 
         }
 
-        static void View(List<Dinosaur> dinosaursToBeViewed)
+
+        static String GetName()
+        {
+            Console.Write("\nWhat's the dinosaur's name? ");
+            return Console.ReadLine();
+        }
+
+
+        static void ViewDinosaurs(IEnumerable<Dinosaur> dinosaursToBeViewed)
         {
             dinosaursToBeViewed.OrderBy(dinosaur => dinosaur.WhenAcquired);
             foreach (var dinosaur in dinosaursToBeViewed)
@@ -52,10 +62,9 @@ namespace JurasicPark
         }
 
 
-        static List<Dinosaur> Add(List<Dinosaur> dinosaurs)
+        static IEnumerable<Dinosaur> AddDinosaurs(List<Dinosaur> dinosaurs)
         {
-            Console.Write("\nWhat's the dinosaur's name? ");
-            var name = Console.ReadLine();
+            var name = GetName();
 
             Console.Write($"\nIs {name} a carnivore or herbivore? ");
             var diet = Console.ReadLine();
@@ -76,11 +85,28 @@ namespace JurasicPark
             dinosaurs.Add(dinosaurToAdd);
             return dinosaurs;
         }
-        // Create a method for add
 
-        // - capture all user required inputs for the dinosaur class, and place that new object within the dinosaur list
 
-        // Create a method for remove
+        static IEnumerable<Dinosaur> RemoveDinosaurs(List<Dinosaur> dinosaurs)
+        {
+            var name = GetName();
+
+            var dinosaursWithThatName = dinosaurs.Where(dinosaur => dinosaur.Name == name);
+            ViewDinosaurs(dinosaursWithThatName);
+
+            Console.Write("\nWhich dinosaur would you like to delete? ");
+            var dinoNumber = int.Parse(Console.ReadLine());
+
+            while (dinoNumber <= 0 || dinoNumber > dinosaursWithThatName.Count())
+            {
+                Console.WriteLine("\nThat number is bigger or smaller than the amount of dinosaurs that you opted to delete");
+                Console.Write("Please enter a different number: ");
+                dinoNumber = int.Parse(Console.ReadLine());
+            }
+            dinosaurs.Remove(dinosaurs[dinoNumber - 1]);
+            Console.WriteLine("\nDinosaur successfully removed\n");
+            return dinosaurs;
+        }
 
         // - ask the user for the dinosaur's name
         // - find the dinosaur and display dinosaurs info
@@ -119,15 +145,15 @@ namespace JurasicPark
                 switch (choice)
                 {
                     case "VIEW":
-                        View(dinosaurs);
+                        ViewDinosaurs(dinosaurs);
                         choice = Menu();
                         break;
                     case "ADD":
-                        Add(dinosaurs);
+                        AddDinosaurs(dinosaurs);
                         choice = Menu();
                         break;
                     case "REMOVE":
-                        Console.WriteLine("Testing");
+                        RemoveDinosaurs(dinosaurs);
                         choice = Menu();
                         break;
                     case "TRANSFER":
